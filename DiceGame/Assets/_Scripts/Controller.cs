@@ -19,19 +19,6 @@ public class Controller : MonoBehaviour
         }
     }
 
-    [SerializeField] private int m_fieldSize;
-    public int FieldSize 
-    {
-        get { return m_fieldSize; }
-        set { m_fieldSize = value; }
-    }
-    [SerializeField] private int m_emptySquares;
-    [SerializeField] private int m_tokenTypes;
-    public int TokenTypes 
-    {
-        get { return m_tokenTypes; }
-        set { m_tokenTypes = value; }
-    }
     [SerializeField] private Color[] m_tokenColors;
     public Color[] TokenColors 
     {
@@ -40,13 +27,32 @@ public class Controller : MonoBehaviour
     }
 
     private List<List<Token>> m_tokensByTypes;
-
     public List<List<Token>> TokensByTypes 
     {
         get { return m_tokensByTypes; }
         set { m_tokensByTypes = value; }
     }
-    // Start is called before the first frame update
+
+    private Field m_field;
+    public Field field
+    {
+        get { return m_field; }
+        set { m_field = value; }
+    }
+
+    [SerializeField] private LevelParameters m_level;
+    public LevelParameters Level 
+    {
+        get { return m_level; }
+    }
+
+    private int m_currentLevel;
+    public int CurrentLevel 
+    {
+        get { return m_currentLevel; }
+        set { m_currentLevel = value; }
+    }
+
     void Awake()
     {
         if(m_instance == null)
@@ -61,20 +67,16 @@ public class Controller : MonoBehaviour
                 Destroy(this.gameObject);
         }
 
-        m_tokenColors = MakeColor(m_tokenTypes);
+        m_tokenColors = MakeColor(Level.TokenTypes);
 
         TokensByTypes = new List<List<Token>>();
 
-        for(int i = 0; i < TokenTypes; i++)
+        for(int i = 0; i < Level.TokenTypes; i++)
         {
             TokensByTypes.Add(new List<Token>());
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        InitializeLevel();
     }
 
     private Color[] MakeColor(int count)
@@ -100,6 +102,9 @@ public class Controller : MonoBehaviour
         if(IsAllTokensConnected())
         {
             Debug.Log("Win!");
+            m_currentLevel++;
+            Destroy(m_field.gameObject);
+            InitializeLevel();
         }
         else
         {
@@ -179,5 +184,21 @@ public class Controller : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void InitializeLevel()
+    {
+        m_level = new LevelParameters(m_currentLevel);
+
+        TokenColors = MakeColor(Level.TokenTypes);
+
+        TokensByTypes = new List<List<Token>>();
+
+        for(int i = 0; i < Level.TokenTypes; i++)
+        {
+            TokensByTypes.Add(new List<Token>());
+        }
+
+        m_field = Field.Create(Level.FieldSize, Level.FreeSpace);
     }
 }

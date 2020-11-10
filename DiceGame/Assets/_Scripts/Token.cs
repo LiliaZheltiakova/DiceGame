@@ -15,10 +15,11 @@ public class Token : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHan
     {
         m_camera = Camera.main;
         AlignOnGrid();
-        m_tokenType = UnityEngine.Random.Range(0, Controller.Instance.TokenTypes);
+        m_tokenType = UnityEngine.Random.Range(0, Controller.Instance.Level.TokenTypes);
         Material myMaterial = gameObject.GetComponent<Renderer>().material;
         myMaterial.SetColor("_Color", Controller.Instance.TokenColors[m_tokenType]);
         Controller.Instance.TokensByTypes[m_tokenType].Add(this);
+        this.transform.SetParent(Controller.Instance.field.transform);
     }
 
     // Update is called once per frame
@@ -74,12 +75,12 @@ public class Token : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHan
     private void GetDragSpace()
     {
         int OddEven = 1;
-        if(Controller.Instance.FieldSize % 2 != 0)
+        if(Controller.Instance.Level.FieldSize % 2 != 0)
         {
             OddEven = 0;
         }
         m_dragSpace = new int[] {0, 0, 0, 0};
-        int halfField = (Controller.Instance.FieldSize - 1) / 2;
+        int halfField = (Controller.Instance.Level.FieldSize - 1) / 2;
 
         m_dragSpace[0] = CheckSpace(Vector2.right);
 
