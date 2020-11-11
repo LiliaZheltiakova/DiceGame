@@ -57,6 +57,7 @@ public class Controller : MonoBehaviour
     public Score Score
     {
         get { return m_score; }
+        set { m_score = value; }
     }
 
     [SerializeField] private Audio m_audio;
@@ -79,6 +80,7 @@ public class Controller : MonoBehaviour
                 Destroy(this.gameObject);
         }
 
+
         m_tokenColors = MakeColor(Level.TokenTypes);
 
         TokensByTypes = new List<List<Token>>();
@@ -93,11 +95,13 @@ public class Controller : MonoBehaviour
         Audio.SourceMusic = gameObject.AddComponent<AudioSource>();
         Audio.SourceRandomPitchSFX = gameObject.AddComponent<AudioSource>();
         Audio.SourceFX = gameObject.AddComponent<AudioSource>();
-
+        
+        DataStore.LoadOptions();
     }
 
     void Start() 
     {
+        DataStore.LoadGame();
         Audio.PlayMusic(true);
     }
 
@@ -125,15 +129,19 @@ public class Controller : MonoBehaviour
         if(IsAllTokensConnected())
         {
             Debug.Log("Win!");
-            Audio.PlaySound("Vitcory");
+            Audio.PlaySound("Victory");
+            HUD.Instance.CountScore(m_level.Turns);
             m_currentLevel++;
             Score.AddLevelBonus();
             Destroy(m_field.gameObject);
-            InitializeLevel();
         }
         else
         {
             Debug.Log("Continue...");
+            if(m_level.Turns > 0)
+            {
+                m_level.Turns--;
+            }
         }
     }
 
@@ -233,5 +241,7 @@ public class Controller : MonoBehaviour
         Score.CurrentScore = 0;
         Destroy(m_field.gameObject);
         InitializeLevel();
+
+        DataStore.SaveGame();
     }
 }

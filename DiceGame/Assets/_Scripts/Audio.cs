@@ -24,7 +24,11 @@ public class Audio
     public AudioSource SourceRandomPitchSFX
     {
         get { return sourceRandomPitchSFX; }
-        set { sourceRandomPitchSFX = value; }
+        set 
+        { 
+            sourceRandomPitchSFX = value; 
+            DataStore.SaveOptions();
+        }
     }
 
     private float musicVolume = 1f;
@@ -35,6 +39,7 @@ public class Audio
         { 
             musicVolume = value; 
             SourceMusic.volume = musicVolume;
+            DataStore.SaveOptions();
         }
     }
     private float sfxVolume = 1f;
@@ -46,6 +51,7 @@ public class Audio
             sfxVolume = value; 
             SourceFX.volume = sfxVolume;
             SourceRandomPitchSFX.volume = sfxVolume;
+            DataStore.SaveOptions();
         }
     }
     [SerializeField] private AudioClip[] sounds;

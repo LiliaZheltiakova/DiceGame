@@ -12,15 +12,20 @@ public class HUD : MonoBehaviour
         get { return m_instance; }
     }
 
-    [SerializeField] private TextMeshProUGUI m_scoreValue;
+    [SerializeField] private TextMeshProUGUI[] m_scoreValue;
     [SerializeField] private TextMeshProUGUI m_turnsValue;
 
     [SerializeField] private Slider m_soundSlider;
     [SerializeField] private Slider m_musicSlider;
 
+    [SerializeField] private CanvasGroup m_levelCompleteWindow;
+
+    private GraphicRaycaster m_raycaster;
+
     void Awake()
     {
         m_instance = this;
+        m_raycaster = gameObject.GetComponent<GraphicRaycaster>();
     }
 
     void Update()
@@ -35,7 +40,11 @@ public class HUD : MonoBehaviour
 
     public void UpdateScoreValue(int value)
     {
-        m_scoreValue.text = value.ToString();
+        for(int i = 0; i < m_scoreValue.Length; i++)
+        {
+            m_scoreValue[i].text = value.ToString();
+        }
+        
     }
 
     public void ShowWindow(CanvasGroup window)
@@ -79,4 +88,34 @@ public class HUD : MonoBehaviour
         m_soundSlider.value = Controller.Instance.Audio.SfxVolume;
     }
 
+    public void Next()
+    {
+        Controller.Instance.InitializeLevel();
+    }
+
+    private IEnumerator Count(int to, float delay)
+    {
+        m_raycaster.enabled = false;
+
+        for(int i = 0; i <= to; i++)
+        {
+            yield return new WaitForSeconds(delay);
+
+            Controller.Instance.Score.AddTurnBonus();
+        }
+        DataStore.SaveGame();
+        m_raycaster.enabled = true;
+        yield break;
+    }
+
+    public void CountScore(int to)
+    {
+        ShowWindow(m_levelCompleteWindow);
+        StartCoroutine(Count(to, .3f));
+    }
+
+    public void PlayPreviewSound()
+    {
+        Controller.Instance.Audio.PlaySound("Drop");
+    }
 }
