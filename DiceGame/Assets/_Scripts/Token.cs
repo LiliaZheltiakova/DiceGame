@@ -10,6 +10,8 @@ public class Token : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHan
     private Vector3 m_positionBeforeDrag;
     private int[] m_dragSpace;
     private int m_tokenType;
+
+    private AudioSource m_audioSource;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +22,8 @@ public class Token : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHan
         myMaterial.SetColor("_Color", Controller.Instance.TokenColors[m_tokenType]);
         Controller.Instance.TokensByTypes[m_tokenType].Add(this);
         this.transform.SetParent(Controller.Instance.field.transform);
+
+        m_audioSource = this.gameObject.GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -33,11 +37,15 @@ public class Token : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHan
         m_pointerPositionBeforeDrag = m_camera.ScreenToWorldPoint(eventData.position);
         m_positionBeforeDrag = this.transform.position;
 
+        m_audioSource.Play();
+
         GetDragSpace();
     }
 
     public void OnDrag(PointerEventData eventData)
     {
+        Vector3 previousPosition = this.transform.position;
+
         Vector3 mouseWorldPosition = m_camera.ScreenToWorldPoint(eventData.position);
         //mouse offset relative to the point where we drag the dice
         Vector3 totalDrag = mouseWorldPosition - m_pointerPositionBeforeDrag;
@@ -56,11 +64,23 @@ public class Token : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHan
             //vertical movement
             this.transform.position = new Vector3(m_pointerPositionBeforeDrag.x, posY, this.transform.position.z);
         }
+
+        float currentFrameTokenDrag = Vector3.Distance(previousPosition, this.transform.position);
+
+        float clampedPitchDrag = Mathf.Clamp(currentFrameTokenDrag * 10, .9f, 1.05f);
+        m_audioSource.pitch = Mathf.Lerp(m_audioSource.pitch, clampedPitchDrag, .5f);
+
+        float clampedVolumeDrag = Mathf.Clamp(currentFrameTokenDrag * 10, .2f, 1.2f);
+        float interpolatedDrag = Mathf.Lerp(m_audioSource.volume, clampedVolumeDrag - .2f, .7f);
+        m_audioSource.volume = interpolatedDrag * Controller.Instance.Audio.SfxVolume;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         AlignOnGrid();
+
+        m_audioSource.Stop();
+
         Controller.Instance.TurnDone();
     }
 

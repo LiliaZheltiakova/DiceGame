@@ -53,6 +53,18 @@ public class Controller : MonoBehaviour
         set { m_currentLevel = value; }
     }
 
+    [SerializeField] private Score m_score;
+    public Score Score
+    {
+        get { return m_score; }
+    }
+
+    [SerializeField] private Audio m_audio;
+    public Audio Audio 
+    {
+        get { return m_audio; }
+    }
+
     void Awake()
     {
         if(m_instance == null)
@@ -77,6 +89,16 @@ public class Controller : MonoBehaviour
         }
 
         InitializeLevel();
+
+        Audio.SourceMusic = gameObject.AddComponent<AudioSource>();
+        Audio.SourceRandomPitchSFX = gameObject.AddComponent<AudioSource>();
+        Audio.SourceFX = gameObject.AddComponent<AudioSource>();
+
+    }
+
+    void Start() 
+    {
+        Audio.PlayMusic(true);
     }
 
     private Color[] MakeColor(int count)
@@ -99,10 +121,13 @@ public class Controller : MonoBehaviour
 
     public void TurnDone()
     {
+        Audio.PlaySound("Drop");
         if(IsAllTokensConnected())
         {
             Debug.Log("Win!");
+            Audio.PlaySound("Vitcory");
             m_currentLevel++;
+            Score.AddLevelBonus();
             Destroy(m_field.gameObject);
             InitializeLevel();
         }
@@ -200,5 +225,13 @@ public class Controller : MonoBehaviour
         }
 
         m_field = Field.Create(Level.FieldSize, Level.FreeSpace);
+    }
+
+    public void Reset()
+    {
+        CurrentLevel = 1;
+        Score.CurrentScore = 0;
+        Destroy(m_field.gameObject);
+        InitializeLevel();
     }
 }

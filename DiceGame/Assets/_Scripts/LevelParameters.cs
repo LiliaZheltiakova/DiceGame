@@ -30,6 +30,11 @@ public class LevelParameters
     public int Turns 
     {
         get { return m_turns; }
+        set
+        {
+            m_turns = value;
+            HUD.Instance.UpdateTurnsValue(m_turns);
+        }
     }
 
     public LevelParameters(int currentLevel)
@@ -54,6 +59,6 @@ public class LevelParameters
             m_tokenTypes = 10;
         }
 
-        m_turns = (((m_fieldSize * m_fieldSize / 2) - m_freeSpace) * m_tokenTypes) + m_fieldSize;
+        Turns = (((m_fieldSize * m_fieldSize / 2) - m_freeSpace) * m_tokenTypes) + m_fieldSize;
     }
 }
